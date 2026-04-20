@@ -279,9 +279,9 @@ const dashboard = {
   },
 } as const
 
-export type DashboardStrings = typeof dashboard.es
+export type DashboardStrings = typeof dashboard.es | typeof dashboard.en
 
-export function useT(): DashboardStrings {
+export function useT() {
   const { lang } = useLang()
   return dashboard[lang]
 }

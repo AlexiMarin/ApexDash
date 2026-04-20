@@ -35,7 +35,7 @@ async function getBundle() {
     },
   }
   const b = await duckdb.selectBundle(LOCAL_BUNDLES)
-  _bundle = { mainModule: b.mainModule!, mainWorker: b.mainWorker!, pthreadWorker: b.pthreadWorker }
+  _bundle = { mainModule: b.mainModule!, mainWorker: b.mainWorker!, pthreadWorker: b.pthreadWorker ?? undefined }
   return _bundle
 }
 
@@ -45,7 +45,7 @@ async function freshDB(): Promise<duckdb.AsyncDuckDB> {
     await _db.terminate().catch(() => {})
     _db = null
   }
-  const b = await getBundle()
+  const b = (await getBundle())!
   const worker = new Worker(b.mainWorker)
   const logger = new duckdb.ConsoleLogger()
   const db = new duckdb.AsyncDuckDB(logger, worker)
