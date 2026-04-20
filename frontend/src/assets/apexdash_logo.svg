@@ -1,0 +1,24 @@
+<svg width="100%" viewBox="192 10 435 190" role="img" xmlns="http://www.w3.org/2000/svg" style="">
+  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">ApexDash Logo</title>
+  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Logo para ApexDash, plataforma de telemetría de Le Mans Ultimate</desc>
+
+  <defs></defs>
+
+  <!-- Hexagon background -->
+  <polygon points="224,75 280,43 336,75 336,135 280,167 224,135" fill="none" stroke="#F5C400" stroke-width="11" style="fill:none;stroke:rgb(245, 196, 0);color:rgb(255, 255, 255);stroke-width:11px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Inner hexagon accent -->
+  <polygon points="240,84 280,61 320,84 320,126 280,149 240,126" fill="none" stroke="#F5C400" stroke-width="9" opacity="0.4" style="fill:none;stroke:rgb(245, 196, 0);color:rgb(255, 255, 255);stroke-width:9px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.4;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+
+
+
+
+  <!-- APEX text -->
+  <text x="390" y="100" font-family="'Arial Black', sans-serif" font-size="62" font-weight="900" fill="#F5C400" letter-spacing="-2" dominant-baseline="auto" style="fill:rgb(245, 196, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Black&quot;, sans-serif;font-size:62px;font-weight:900;text-anchor:start;dominant-baseline:auto">APEX</text>
+
+  <!-- DASH text -->
+  <text x="392" y="162" font-family="'Arial Black', sans-serif" font-size="62" font-weight="900" fill="#f0f0f0" letter-spacing="-2" dominant-baseline="auto" style="fill:rgb(240, 240, 240);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Black&quot;, sans-serif;font-size:62px;font-weight:900;text-anchor:start;dominant-baseline:auto">DASH</text>
+
+
+</svg>

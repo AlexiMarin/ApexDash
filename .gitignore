@@ -1,0 +1,55 @@
+# ── Secrets ─────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Private deploy script ───────────────────
+_publish.sh
+
+# ── Python ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# ── Node / Frontend ──────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+
+# ── Output / generated files ─────────────────
+output/
+
+# ── DuckDB / data files ──────────────────────
+*.duckdb
+*.duckdb.wal
+
+# ── macOS ────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── Editors ──────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ── Logs ─────────────────────────────────────
+*.log
+logs/
+
+# ── Docker volumes (if mounted locally) ──────
+supabase/volumes/db/data/
+supabase/volumes/storage/
+
+_*.sh

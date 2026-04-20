@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+# Usage: ./lmutry <command> [subcommand]
+#   ./lmutry install      – create venv + install backend deps + npm install
+#   ./lmutry migrate      – apply all SQL migrations to postgres
+#   ./lmutry run dev      – start backend (uvicorn) + frontend (npm run dev)
+#   ./lmutry run back     – backend only
+#   ./lmutry run front    – frontend only
+#   ./lmutry stop         – kill whatever is on ports 8000 & 5173
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV="$ROOT/venv"
+BACKEND="$ROOT/backend"
+FRONTEND="$ROOT/frontend"
+
+# ── Colours ──────────────────────────────────────────────────
+CYAN='\033[0;36m'; GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
+
+log()  { echo -e "${CYAN}[lmutry]${NC} $*"; }
+ok()   { echo -e "${GREEN}[lmutry]${NC} $*"; }
+err()  { echo -e "${RED}[lmutry]${NC} $*" >&2; }
+
+# ── Guards (skip for install) ─────────────────────────────────
+CMD="${1:-help}"
+SUB="${2:-}"
+
+if [[ "$CMD" != "install" && "$CMD" != "migrate" ]]; then
+  if [[ ! -d "$VENV" ]]; then
+    err "venv not found – run: ./lmutry install"
+    exit 1
+  fi
+
+  if [[ ! -d "$FRONTEND/node_modules" ]]; then
+    err "node_modules not found – run: ./lmutry install"
+    exit 1
+  fi
+fi
+
+# ── Process management ───────────────────────────────────────
+PIDS=()
+
+cleanup() {
+  log "Shutting down…"
+  for pid in "${PIDS[@]+${PIDS[@]}}"; do
+    kill "$pid" 2>/dev/null || true
+  done
+  wait 2>/dev/null
+  ok "Done."
+}
+trap cleanup EXIT INT TERM
+
+run_back() {
+  log "Starting backend  →  http://localhost:8000  (docs: /docs)"
+  (
+    cd "$BACKEND"
+    "$VENV/bin/python" -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+  ) &
+  PIDS+=($!)
+}
+
+run_front() {
+  log "Starting frontend →  http://localhost:5173"
+  (
+    cd "$FRONTEND"
+    npm run dev
+  ) &
+  PIDS+=($!)
+}
+
+# ── Commands ─────────────────────────────────────────────────
+case "$CMD" in
+  install)
+    # ── .env ─────────────────────────────────────────────────
+    if [[ ! -f "$ROOT/.env" ]]; then
+      cp "$ROOT/.env.example" "$ROOT/.env"
+      ok ".env created from .env.example — edit it before running with a real DB."
+    else
+      log ".env already exists, skipping."
+    fi
+
+    # ── Python venv ──────────────────────────────────────────
+    if [[ ! -d "$VENV" ]]; then
+      log "Creating Python venv…"
+      python3 -m venv "$VENV"
+      ok "venv created at $VENV"
+    else
+      log "venv already exists, syncing packages…"
+    fi
+
+    log "Installing/updating backend dependencies…"
+    "$VENV/bin/pip" install --upgrade pip -q
+    "$VENV/bin/pip" install -e "$BACKEND"
+    ok "Backend deps ready."
+
+    # ── Node / npm ───────────────────────────────────────────
+    log "Installing frontend dependencies…"
+    (cd "$FRONTEND" && npm install)
+    ok "Frontend deps ready."
+
+    ok "All done. Run: ./lmutry run dev"
+    ;;
+  migrate)
+    MIGRATIONS_DIR="$BACKEND/migrations"
+    # Detect whether to use docker compose or a local psql
+    if docker compose -f "$ROOT/docker-compose.prod.yaml" ps --services 2>/dev/null | grep -q db; then
+      PSQL_CMD="docker compose -f $ROOT/docker-compose.prod.yaml exec -T db psql -U postgres -d lmutry"
+    elif command -v psql &>/dev/null; then
+      # parse DATABASE_URL from .env for local psql
+      source <(grep -E '^DATABASE_URL=' "$ROOT/.env" | sed 's/DATABASE_URL=postgresql\+asyncpg:\/\///' | \
+        python3 -c "
+import sys, re
+url = sys.stdin.read().strip()
+m = re.match(r'(.+):(.+)@(.+):(\d+)/(.+)', url)
+if m:
+    user,pw,host,port,db = m.groups()
+    print(f'export PGUSER={user} PGPASSWORD={pw} PGHOST={host} PGPORT={port} PGDATABASE={db}')
+")
+      PSQL_CMD="psql"
+    else
+      err "Neither docker compose nor psql found. Start postgres first."
+      exit 1
+    fi
+
+    count=0
+    for f in "$MIGRATIONS_DIR"/*.sql; do
+      [[ -f "$f" ]] || continue
+      log "Applying $(basename "$f")…"
+      $PSQL_CMD -f /dev/stdin < "$f"
+      ok "$(basename "$f") applied."
+      count=$((count + 1))
+    done
+    [[ $count -gt 0 ]] && ok "$count migration(s) applied." || log "No migration files found."
+    ;;
+  seed)
+    SEED_FILE="$BACKEND/migrations/002_seed_dev.sql"
+    _pg_connect() {
+      if docker compose -f "$ROOT/docker-compose.prod.yaml" ps --services 2>/dev/null | grep -q db; then
+        echo "docker compose -f $ROOT/docker-compose.prod.yaml exec -T db psql -U postgres -d lmutry"
+      elif command -v psql &>/dev/null; then
+        source <(grep -E '^DATABASE_URL=' "$ROOT/.env" | sed 's/DATABASE_URL=postgresql+asyncpg:\/\///' | \
+          python3 -c "
+import sys, re
+url = sys.stdin.read().strip()
+m = re.match(r'(.+):(.+)@(.+):(\d+)/(.+)', url)
+if m:
+    user,pw,host,port,db = m.groups()
+    print(f'export PGUSER={user} PGPASSWORD={pw} PGHOST={host} PGPORT={port} PGDATABASE={db}')
+")
+        echo "psql"
+      else
+        err "Neither docker compose nor psql found."
+        exit 1
+      fi
+    }
+    PSQL_CMD=$(_pg_connect)
+    log "Seeding approved circuits…"
+    $PSQL_CMD -f /dev/stdin < "$SEED_FILE"
+    ok "Seed applied."
+    ;;
+  run)
+    case "$SUB" in
+      dev)
+        run_back
+        run_front
+        ok "Both services running. Press Ctrl+C to stop."
+        wait
+        ;;
+      back|backend)
+        run_back
+        ok "Backend running. Press Ctrl+C to stop."
+        wait
+        ;;
+      front|frontend)
+        run_front
+        ok "Frontend running. Press Ctrl+C to stop."
+        wait
+        ;;
+      *)
+        err "Unknown subcommand '$SUB'. Use: dev | back | front"
+        exit 1
+        ;;
+    esac
+    ;;
+  stop)
+    PORTS=(8000 5173)
+    killed=0
+    for port in "${PORTS[@]}"; do
+      pids=$(lsof -ti tcp:"$port" 2>/dev/null || true)
+      if [[ -n "$pids" ]]; then
+        echo "$pids" | xargs kill -9 2>/dev/null || true
+        ok "Port $port freed."
+        killed=$((killed + 1))
+      else
+        log "Port $port already free."
+      fi
+    done
+    [[ $killed -gt 0 ]] && ok "Done." || log "Nothing to stop."
+    ;;
+  *)
+    echo "Usage:"
+    echo "  ./lmutry install    – create venv + install all deps"
+    echo "  ./lmutry migrate    – apply all SQL migrations"
+    echo "  ./lmutry run dev    – backend + frontend"
+    echo "  ./lmutry run back   – backend only"
+    echo "  ./lmutry run front  – frontend only"
+    echo "  ./lmutry stop       – kill ports 8000 & 5173"
+    ;;
+esac
