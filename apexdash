@@ -102,9 +102,14 @@ case "$CMD" in
     ;;
   migrate)
     MIGRATIONS_DIR="$BACKEND/migrations"
+    # Load env vars
+    source <(grep -E '^(POSTGRES_USER|POSTGRES_DB)=' "$ROOT/.env")
+    PG_USER="${POSTGRES_USER:-postgres}"
+    PG_DB="${POSTGRES_DB:-lmutry}"
+    
     # Detect whether to use docker compose or a local psql
-    if docker compose -f "$ROOT/docker-compose.prod.yaml" ps --services 2>/dev/null | grep -q db; then
-      PSQL_CMD="docker compose -f $ROOT/docker-compose.prod.yaml exec -T db psql -U postgres -d apexdash"
+    if docker compose -f "$ROOT/docker-compose.yaml" ps --services 2>/dev/null | grep -q database; then
+      PSQL_CMD="docker compose -f $ROOT/docker-compose.yaml exec -T database psql -U $PG_USER -d $PG_DB"
     elif command -v psql &>/dev/null; then
       # parse DATABASE_URL from .env for local psql
       source <(grep -E '^DATABASE_URL=' "$ROOT/.env" | sed 's/DATABASE_URL=postgresql\+asyncpg:\/\///' | \
@@ -134,9 +139,14 @@ if m:
     ;;
   seed)
     SEED_FILE="$BACKEND/migrations/002_seed_dev.sql"
+    # Load env vars
+    source <(grep -E '^(POSTGRES_USER|POSTGRES_DB)=' "$ROOT/.env")
+    PG_USER="${POSTGRES_USER:-postgres}"
+    PG_DB="${POSTGRES_DB:-lmutry}"
+    
     _pg_connect() {
-      if docker compose -f "$ROOT/docker-compose.prod.yaml" ps --services 2>/dev/null | grep -q db; then
-        echo "docker compose -f $ROOT/docker-compose.prod.yaml exec -T db psql -U postgres -d apexdash"
+      if docker compose -f "$ROOT/docker-compose.yaml" ps --services 2>/dev/null | grep -q database; then
+        echo "docker compose -f $ROOT/docker-compose.yaml exec -T database psql -U $PG_USER -d $PG_DB"
       elif command -v psql &>/dev/null; then
         source <(grep -E '^DATABASE_URL=' "$ROOT/.env" | sed 's/DATABASE_URL=postgresql+asyncpg:\/\///' | \
           python3 -c "
