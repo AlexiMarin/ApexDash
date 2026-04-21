@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Usage: ./lmutry <command> [subcommand]
-#   ./lmutry install      – create venv + install backend deps + npm install
-#   ./lmutry migrate      – apply all SQL migrations to postgres
-#   ./lmutry run dev      – start backend (uvicorn) + frontend (npm run dev)
-#   ./lmutry run back     – backend only
-#   ./lmutry run front    – frontend only
-#   ./lmutry stop         – kill whatever is on ports 8000 & 5173
+# Usage: ./apexdash <command> [subcommand]
+#   ./apexdash install      – create venv + install backend deps + npm install
+#   ./apexdash migrate      – apply all SQL migrations to postgres
+#   ./apexdash run dev      – start backend (uvicorn) + frontend (npm run dev)
+#   ./apexdash run back     – backend only
+#   ./apexdash run front    – frontend only
+#   ./apexdash stop         – kill whatever is on ports 8000 & 5173
 
 set -euo pipefail
 
@@ -17,9 +17,9 @@ FRONTEND="$ROOT/frontend"
 # ── Colours ──────────────────────────────────────────────────
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
 
-log()  { echo -e "${CYAN}[lmutry]${NC} $*"; }
-ok()   { echo -e "${GREEN}[lmutry]${NC} $*"; }
-err()  { echo -e "${RED}[lmutry]${NC} $*" >&2; }
+log()  { echo -e "${CYAN}[apexdash]${NC} $*"; }
+ok()   { echo -e "${GREEN}[apexdash]${NC} $*"; }
+err()  { echo -e "${RED}[apexdash]${NC} $*" >&2; }
 
 # ── Guards (skip for install) ─────────────────────────────────
 CMD="${1:-help}"
@@ -27,12 +27,12 @@ SUB="${2:-}"
 
 if [[ "$CMD" != "install" && "$CMD" != "migrate" ]]; then
   if [[ ! -d "$VENV" ]]; then
-    err "venv not found – run: ./lmutry install"
+    err "venv not found – run: ./apexdash install"
     exit 1
   fi
 
   if [[ ! -d "$FRONTEND/node_modules" ]]; then
-    err "node_modules not found – run: ./lmutry install"
+    err "node_modules not found – run: ./apexdash install"
     exit 1
   fi
 fi
@@ -98,13 +98,18 @@ case "$CMD" in
     (cd "$FRONTEND" && npm install)
     ok "Frontend deps ready."
 
-    ok "All done. Run: ./lmutry run dev"
+    ok "All done. Run: ./apexdash run dev"
     ;;
   migrate)
     MIGRATIONS_DIR="$BACKEND/migrations"
+    # Load env vars
+    source <(grep -E '^(POSTGRES_USER|POSTGRES_DB)=' "$ROOT/.env")
+    PG_USER="${POSTGRES_USER:-postgres}"
+    PG_DB="${POSTGRES_DB:-lmutry}"
+    
     # Detect whether to use docker compose or a local psql
-    if docker compose -f "$ROOT/docker-compose.prod.yaml" ps --services 2>/dev/null | grep -q db; then
-      PSQL_CMD="docker compose -f $ROOT/docker-compose.prod.yaml exec -T db psql -U postgres -d lmutry"
+    if docker compose -f "$ROOT/docker-compose.yaml" ps --services 2>/dev/null | grep -q database; then
+      PSQL_CMD="docker compose -f $ROOT/docker-compose.yaml exec -T database psql -U $PG_USER -d $PG_DB"
     elif command -v psql &>/dev/null; then
       # parse DATABASE_URL from .env for local psql
       source <(grep -E '^DATABASE_URL=' "$ROOT/.env" | sed 's/DATABASE_URL=postgresql\+asyncpg:\/\///' | \
@@ -134,9 +139,14 @@ if m:
     ;;
   seed)
     SEED_FILE="$BACKEND/migrations/002_seed_dev.sql"
+    # Load env vars
+    source <(grep -E '^(POSTGRES_USER|POSTGRES_DB)=' "$ROOT/.env")
+    PG_USER="${POSTGRES_USER:-postgres}"
+    PG_DB="${POSTGRES_DB:-lmutry}"
+    
     _pg_connect() {
-      if docker compose -f "$ROOT/docker-compose.prod.yaml" ps --services 2>/dev/null | grep -q db; then
-        echo "docker compose -f $ROOT/docker-compose.prod.yaml exec -T db psql -U postgres -d lmutry"
+      if docker compose -f "$ROOT/docker-compose.yaml" ps --services 2>/dev/null | grep -q database; then
+        echo "docker compose -f $ROOT/docker-compose.yaml exec -T database psql -U $PG_USER -d $PG_DB"
       elif command -v psql &>/dev/null; then
         source <(grep -E '^DATABASE_URL=' "$ROOT/.env" | sed 's/DATABASE_URL=postgresql+asyncpg:\/\///' | \
           python3 -c "
@@ -199,11 +209,11 @@ if m:
     ;;
   *)
     echo "Usage:"
-    echo "  ./lmutry install    – create venv + install all deps"
-    echo "  ./lmutry migrate    – apply all SQL migrations"
-    echo "  ./lmutry run dev    – backend + frontend"
-    echo "  ./lmutry run back   – backend only"
-    echo "  ./lmutry run front  – frontend only"
-    echo "  ./lmutry stop       – kill ports 8000 & 5173"
+    echo "  ./apexdash install    – create venv + install all deps"
+    echo "  ./apexdash migrate    – apply all SQL migrations"
+    echo "  ./apexdash run dev    – backend + frontend"
+    echo "  ./apexdash run back   – backend only"
+    echo "  ./apexdash run front  – frontend only"
+    echo "  ./apexdash stop       – kill ports 8000 & 5173"
     ;;
 esac

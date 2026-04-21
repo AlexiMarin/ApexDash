@@ -89,7 +89,7 @@ pip install -e ".[dev]"
 Create a `.env` file in the project root:
 
 ```env
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/lmutry
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/apexdash
 CORS_ORIGINS=http://localhost:5173
 ```
 
@@ -143,7 +143,7 @@ docker compose -f docker-compose.prod.yaml up -d
 |---|---|---|
 | `POSTGRES_PASSWORD` | *(required)* | PostgreSQL password |
 | `POSTGRES_USER` | `postgres` | PostgreSQL user |
-| `POSTGRES_DB` | `lmutry` | Database name |
+| `POSTGRES_DB` | `apexdash` | Database name |
 | `CORS_ORIGINS` | `http://localhost` | Allowed CORS origins |
 | `APEXDASH_VERSION` | `latest` | Image tag to pull |
 

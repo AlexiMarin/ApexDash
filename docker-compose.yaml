@@ -1,11 +1,11 @@
 
-name: apex-dash
+name: apexdash
 
 volumes:
   database-data:
 
 services:
-  apexdash-database:
+  database:
     image: postgres:17-alpine
     restart: unless-stopped
     healthcheck:
@@ -22,22 +22,22 @@ services:
     ports:
       - "5432:5432"
 
-  apexdash-service:
+  service:
     image: ghcr.io/aleximarin/apexdash-backend:${APEXDASH_VERSION:-latest}
     restart: unless-stopped
     depends_on:
-      apexdash-database:
+      database:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@apexdash-database:5432/${POSTGRES_DB:-lmutry}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB:-lmutry}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
     ports:
       - "8000:8000"
 
-  apexdash-frontend:
+  frontend:
     image: ghcr.io/aleximarin/apexdash-frontend:${APEXDASH_VERSION:-latest}
     restart: unless-stopped
     depends_on:
-      - apexdash-service
+      - service
     ports:
       - "80:80"

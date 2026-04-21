@@ -37,6 +37,7 @@ output/
 
 # ── Editors ──────────────────────────────────
 .vscode/settings.json
+.github/
 .idea/
 *.swp
 *.swo
@@ -44,9 +45,5 @@ output/
 # ── Logs ─────────────────────────────────────
 *.log
 logs/
-
-# ── Docker volumes (if mounted locally) ──────
-supabase/volumes/db/data/
-supabase/volumes/storage/
 
 _*.sh

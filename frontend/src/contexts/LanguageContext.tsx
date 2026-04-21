@@ -44,6 +44,17 @@ const dashboard = {
     noLapRecorded: 'Sin vuelta registrada',
     uploading: 'Subiendo…',
     loadSession: 'Cargar sesión (.duckdb)',
+    
+    // Telemetry Setup Instructions
+    howToGetFiles: '¿Cómo obtener tus archivos .duckdb?',
+    setupStep1Title: '1. Habilita la telemetría en el juego',
+    setupStep1Desc: 'Ve a Settings > Gameplay y activa "Record Telemetry". ¡Es todo!',
+    setupStep2Title: '2. Completa al menos una vuelta',
+    setupStep2Desc: 'En cualquier sesión de práctica, clasificación o carrera. LMU creará automáticamente un archivo .duckdb.',
+    setupStep3Title: '3. Encuentra tus archivos',
+    setupStep3DescWin: 'C:\\Users\\TuNombre\\Documents\\Le Mans Ultimate\\UserData\\Telemetry\\',
+    setupStep3DescMac: '~/Documents/Le Mans Ultimate/UserData/Telemetry/',
+    setupNote: 'Cada sesión genera su propio archivo. ¡Arrastra el que quieras analizar!',
 
     // ErrorBoundary
     somethingWrong: 'Algo salió mal',
@@ -170,6 +181,17 @@ const dashboard = {
     noLapRecorded: 'No lap recorded',
     uploading: 'Uploading…',
     loadSession: 'Load session (.duckdb)',
+    
+    // Telemetry Setup Instructions
+    howToGetFiles: 'How to get your .duckdb files?',
+    setupStep1Title: '1. Enable telemetry in the game',
+    setupStep1Desc: 'Go to Settings > Gameplay and turn on "Record Telemetry". That\'s it!',
+    setupStep2Title: '2. Complete at least one lap',
+    setupStep2Desc: 'In any practice, qualifying or race session. LMU will automatically create a .duckdb file.',
+    setupStep3Title: '3. Find your files',
+    setupStep3DescWin: 'C:\\Users\\YourName\\Documents\\Le Mans Ultimate\\UserData\\Telemetry\\',
+    setupStep3DescMac: '~/Documents/Le Mans Ultimate/UserData/Telemetry/',
+    setupNote: 'Each session gets its own file. Just drag the one you want to analyze!',
 
     somethingWrong: 'Something went wrong',
     unexpectedError: 'An unexpected error occurred. Please reload the page.',
