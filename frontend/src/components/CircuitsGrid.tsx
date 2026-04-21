@@ -52,17 +52,128 @@ export default function CircuitsGrid({ onUpload, uploading, onSelectCircuit }: P
       .finally(() => setLoading(false))
   }, [])
 
+  const [showInstructions, setShowInstructions] = useState(false)
+  const isWindows = navigator.platform.toLowerCase().includes('win')
+
   return (
     <div className="space-y-8">
-      {/* Hero title */}
-      <div className="text-center space-y-2 pt-4">
-        <h2 className="text-4xl font-extrabold tracking-tight">
-          {t.chooseCircuit}
-        </h2>
-        <p className="text-gray-400 text-sm">
-          {t.chooseCircuitDesc}
-        </p>
+      {/* Header: Title + Upload Button */}
+      <div className="max-w-6xl mx-auto pt-4 px-6">
+        <div className="flex items-center justify-between gap-6">
+          {/* Title and description */}
+          <div className="flex-1 space-y-2">
+            <h2 className="text-4xl font-extrabold tracking-tight">
+              {t.chooseCircuit}
+            </h2>
+            <p className="text-gray-400 text-sm">
+              {t.chooseCircuitDesc}
+            </p>
+          </div>
+
+          {/* Upload CTA */}
+          <div className="flex-shrink-0">
+            <button
+              disabled={uploading}
+              onClick={onUpload}
+              className="flex items-center gap-2 bg-lmu-accent hover:bg-yellow-400 disabled:opacity-50
+                         text-black font-semibold px-6 py-3 rounded-xl transition-colors text-base shadow-lg shadow-lmu-accent/20"
+            >
+              {uploading ? (
+                <><Spinner /><span>{t.uploading}</span></>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <span>{t.loadSession}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Telemetry Setup Instructions */}
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-lmu-secondary border border-lmu-accent/30 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setShowInstructions(!showInstructions)}
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-lmu-highlight/10 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-lmu-accent/20 p-2 rounded-lg">
+                <svg className="w-5 h-5 text-lmu-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="font-semibold text-white">{t.howToGetFiles}</span>
+            </div>
+            <svg
+              className={`w-5 h-5 text-gray-400 transition-transform ${showInstructions ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {showInstructions && (
+            <div className="px-5 pb-5 space-y-4 border-t border-lmu-highlight/20 pt-4">
+              {/* Step 1 */}
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-lmu-accent/20 rounded-full flex items-center justify-center">
+                  <span className="text-lmu-accent font-bold text-sm">1</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-white mb-1">{t.setupStep1Title}</p>
+                  <p className="text-sm text-gray-400">{t.setupStep1Desc}</p>
+                  <div className="mt-2 inline-block bg-lmu-highlight/30 px-3 py-1 rounded text-xs font-mono text-gray-300">
+                    Settings &gt; Gameplay &gt; Record Telemetry
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-lmu-accent/20 rounded-full flex items-center justify-center">
+                  <span className="text-lmu-accent font-bold text-sm">2</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-white mb-1">{t.setupStep2Title}</p>
+                  <p className="text-sm text-gray-400">{t.setupStep2Desc}</p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-lmu-accent/20 rounded-full flex items-center justify-center">
+                  <span className="text-lmu-accent font-bold text-sm">3</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-white mb-1">{t.setupStep3Title}</p>
+                  <div className="mt-2 bg-black/30 px-3 py-2 rounded-lg">
+                    <p className="text-xs font-mono text-gray-300 break-all">
+                      {isWindows ? t.setupStep3DescWin : t.setupStep3DescMac}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Note */}
+              <div className="bg-lmu-accent/10 border border-lmu-accent/20 rounded-lg px-4 py-3">
+                <p className="text-sm text-gray-300">
+                  <span className="text-lmu-accent font-semibold">💡 </span>
+                  {t.setupNote}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+
 
       {/* Circuit cards */}
       {loading ? (
@@ -152,27 +263,6 @@ export default function CircuitsGrid({ onUpload, uploading, onSelectCircuit }: P
           })}
         </div>
       )}
-
-      {/* Upload CTA */}
-      <div className="flex justify-center pb-4">
-        <button
-          disabled={uploading}
-          onClick={onUpload}
-          className="flex items-center gap-2 bg-lmu-accent hover:bg-yellow-400 disabled:opacity-50
-                     text-black font-semibold px-6 py-3 rounded-xl transition-colors text-base shadow-lg shadow-lmu-accent/20"
-        >
-          {uploading ? (
-            <><Spinner /><span>{t.uploading}</span></>
-          ) : (
-            <>
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              <span>{t.loadSession}</span>
-            </>
-          )}
-        </button>
-      </div>
     </div>
   )
 }
