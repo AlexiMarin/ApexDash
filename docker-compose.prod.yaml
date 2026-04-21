@@ -38,6 +38,6 @@ services:
     image: ghcr.io/aleximarin/apexdash-frontend:${APEXDASH_VERSION:-latest}
     restart: unless-stopped
     depends_on:
-      - apexdash-service
+      - service
     ports:
       - "80:80"
